@@ -1,0 +1,5 @@
+{
+  "name": "CineSearch",
+  "description": "A modern, responsive movie search application using the OMDB API.",
+  "requestFramePermissions": []
+}
