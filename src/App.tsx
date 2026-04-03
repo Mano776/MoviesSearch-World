@@ -8,7 +8,7 @@ import Loader from "./components/Loader";
 import { Movie, MovieDetails, SearchResponse } from "./types";
 
 const API_KEY = import.meta.env.VITE_OMDB_API_KEY || "4a3b711b"; // Fallback for demo if not set
-const BASE_URL = "https://www.omdbapi.com/";
+const BASE_URL = "https://www.omdbapi.com";
 
 export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -28,14 +28,19 @@ export default function App() {
 
   const fetchMovies = useCallback(async (searchQuery: string, pageNum: number) => {
     if (!searchQuery) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch(`${BASE_URL}?s=${searchQuery}&page=${pageNum}&apikey=${API_KEY}`);
+      const response = await fetch(`${BASE_URL}/?s=${searchQuery}&page=${pageNum}&apikey=${API_KEY}`);
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
       const data: SearchResponse = await response.json();
-      
+
       if (data.Response === "True") {
         setMovies(data.Search || []);
         setTotalResults(parseInt(data.totalResults || "0"));
@@ -53,7 +58,8 @@ export default function App() {
   const fetchMovieDetails = async (id: string) => {
     setDetailsLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}?i=${id}&plot=full&apikey=${API_KEY}`);
+      const response = await fetch(`${BASE_URL}/?i=${id}&plot=full&apikey=${API_KEY}`);
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
       const data: MovieDetails = await response.json();
       setSelectedMovie(data);
     } catch (err) {
@@ -101,7 +107,7 @@ export default function App() {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div 
+          <div
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => {
               setQuery("Tamil");
@@ -119,11 +125,10 @@ export default function App() {
 
           <button
             onClick={() => setShowFavorites(!showFavorites)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-              showFavorites 
-                ? "bg-red-500/20 text-red-400 border border-red-500/50" 
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${showFavorites
+              ? "bg-red-500/20 text-red-400 border border-red-500/50"
+              : "bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700"
+              }`}
           >
             <Heart className={`h-5 w-5 ${showFavorites ? "fill-current" : ""}`} />
             <span className="hidden sm:inline font-medium">Favorites ({favorites.length})</span>
@@ -135,14 +140,14 @@ export default function App() {
         {/* Hero Section */}
         {!showFavorites && (
           <div className="text-center mb-12 space-y-4">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight"
             >
               Discover Your Next Favorite Movie
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -157,7 +162,7 @@ export default function App() {
         {!showFavorites && (
           <div className="space-y-6">
             <SearchBar onSearch={handleSearch} />
-            
+
             <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
               <span className="text-gray-500 text-sm font-medium uppercase tracking-wider mr-2">Quick Search:</span>
               {[
@@ -171,11 +176,10 @@ export default function App() {
                 <button
                   key={filter.label}
                   onClick={() => handleSearch(filter.query)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
-                    query === filter.query && !showFavorites
-                      ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20"
-                      : "bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
-                  }`}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${query === filter.query && !showFavorites
+                    ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20"
+                    : "bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-200"
+                    }`}
                 >
                   {filter.label}
                 </button>
@@ -199,18 +203,18 @@ export default function App() {
                   <Heart className="h-8 w-8 text-red-500 fill-red-500" />
                   Your Favorites
                 </h3>
-                <button 
+                <button
                   onClick={() => setShowFavorites(false)}
                   className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1"
                 >
                   <ChevronLeft className="h-5 w-5" /> Back to Search
                 </button>
               </div>
-              
+
               {favorites.length > 0 ? (
-                <MovieList 
-                  movies={favorites} 
-                  onMovieClick={handleMovieClick} 
+                <MovieList
+                  movies={favorites}
+                  onMovieClick={handleMovieClick}
                   favorites={favorites}
                   onToggleFavorite={toggleFavorite}
                 />
@@ -246,10 +250,10 @@ export default function App() {
                       <span className="ml-2 text-gray-600">({totalResults} found)</span>
                     </p>
                   </div>
-                  
-                  <MovieList 
-                    movies={movies} 
-                    onMovieClick={handleMovieClick} 
+
+                  <MovieList
+                    movies={movies}
+                    onMovieClick={handleMovieClick}
                     favorites={favorites}
                     onToggleFavorite={toggleFavorite}
                   />
@@ -285,7 +289,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="mt-20 border-t border-gray-900 py-10 text-center text-gray-600">
-        <p>© {new Date().getFullYear()} CineSearch. Powered by OMDB API.</p>
+        <p>© {new Date().getFullYear()} CineSearch.</p>
       </footer>
 
       {/* Movie Details Modal */}
