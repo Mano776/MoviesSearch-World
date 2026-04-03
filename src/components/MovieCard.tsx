@@ -12,7 +12,8 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, isFavorite, onToggleFavorite }) => {
-  const posterUrl = movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450?text=No+Poster";
+  const fallbackPoster = "/no-poster.png";
+  const [imgSrc, setImgSrc] = React.useState(movie.Poster !== "N/A" ? movie.Poster : fallbackPoster);
 
   return (
     <motion.div
@@ -34,8 +35,9 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onClick, isFavorite
 
       <div className="relative aspect-[2/3] overflow-hidden">
         <img
-          src={posterUrl}
+          src={imgSrc}
           alt={movie.Title}
+          onError={() => setImgSrc(fallbackPoster)}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           referrerPolicy="no-referrer"
         />

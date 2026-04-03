@@ -7,7 +7,7 @@ import MovieDetailsModal from "./components/MovieDetails";
 import Loader from "./components/Loader";
 import { Movie, MovieDetails, SearchResponse } from "./types";
 
-const API_KEY = import.meta.env.VITE_OMDB_API_KEY || "4a3b711b"; // Fallback for demo if not set
+const API_KEY = import.meta.env.VITE_OMDB_API_KEY || "a368fd30"; // Valid user key as fallback
 const BASE_URL = "https://www.omdbapi.com";
 
 export default function App() {
@@ -48,8 +48,8 @@ export default function App() {
         setMovies([]);
         setError(data.Error || "No results found");
       }
-    } catch (err) {
-      setError("Failed to fetch movies. Please check your connection.");
+    } catch (err: any) {
+      setError(err instanceof Error ? err.message : "Failed to fetch movies. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -235,13 +235,35 @@ export default function App() {
               {loading ? (
                 <Loader />
               ) : error ? (
-                <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                  <div className="p-4 bg-red-500/10 rounded-full">
-                    <AlertCircle className="h-12 w-12 text-red-500" />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-20 px-6 text-center space-y-6 max-w-md mx-auto bg-gray-900/40 backdrop-blur-xl rounded-3xl border border-red-500/20 shadow-2xl shadow-red-900/10"
+                >
+                  <div className="p-5 bg-red-500/10 rounded-2xl border border-red-500/20 animate-pulse">
+                    <AlertCircle className="h-14 w-14 text-red-500" />
                   </div>
-                  <p className="text-red-400 text-xl font-medium">{error}</p>
-                  <p className="text-gray-500">Try searching for a different title.</p>
-                </div>
+                  <div className="space-y-2">
+                    <h3 className="text-red-400 text-2xl font-bold tracking-tight">Something went wrong</h3>
+                    <p className="text-gray-300 text-lg font-medium">{error}</p>
+                  </div>
+                  
+                  {error.includes("401") ? (
+                    <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700 text-sm text-gray-400 text-left">
+                      <p className="font-bold text-gray-200 mb-1">💡 Troubleshooting Tip:</p>
+                      <p>This "401" error usually means your <strong>OMDB API key</strong> is invalid or inactive. Please ensure you have a valid <code>VITE_OMDB_API_KEY</code> in your <code>.env</code> file.</p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">Try searching for a different title or check your internet connection.</p>
+                  )}
+                  
+                  <button 
+                    onClick={() => handleSearch(query)}
+                    className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-colors border border-gray-700"
+                  >
+                    Try Again
+                  </button>
+                </motion.div>
               ) : (
                 <>
                   <div className="flex items-center justify-between mb-6">

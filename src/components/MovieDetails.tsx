@@ -2,6 +2,7 @@ import React from "react";
 import { X, Star, Calendar, Clock, Film, Award } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MovieDetails as MovieDetailsType } from "../types";
+import { ImgWithFallback } from "./ImgWithFallback";
 
 interface MovieDetailsProps {
   movie: MovieDetailsType | null;
@@ -46,11 +47,9 @@ export default function MovieDetails({ movie, onClose, loading }: MovieDetailsPr
             ) : movie ? (
               <div className="flex flex-col md:flex-row">
                 <div className="w-full md:w-1/3 aspect-[2/3] md:aspect-auto">
-                  <img
-                    src={movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/300x450?text=No+Poster"}
-                    alt={movie.Title}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
+                  <ImgWithFallback 
+                    src={movie.Poster} 
+                    alt={movie.Title} 
                   />
                 </div>
                 
